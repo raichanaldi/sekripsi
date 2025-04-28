@@ -17,10 +17,10 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(to right, #e63946, #1d3557);
+            background: linear-gradient(to right, #e63946, #f1c40f); /* Red and yellow gradient */
         }
         .login-container {
-            background: white;
+            background: #fff;
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
@@ -55,7 +55,7 @@
             font-size: 16px;
         }
         .btn {
-            background: #e63946;
+            background: #e63946; /* Damkar red */
             color: white;
             border: none;
             padding: 12px;
@@ -66,13 +66,13 @@
             transition: 0.3s;
         }
         .btn:hover {
-            background: #d62839;
+            background: #d62839; /* Darker red on hover */
         }
         .back-link {
             margin-top: 15px;
             display: block;
             text-decoration: none;
-            color: #457b9d;
+            color: #f39c12; /* Fire yellow */
             font-size: 14px;
         }
         .back-link:hover {
@@ -83,12 +83,15 @@
             margin-bottom: 10px;
             font-size: 14px;
         }
+        .logo-damkar {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 
 <div class="login-container">
-    <img src="https://vincifire.com/wp-content/uploads/2022/01/LOGO-DAMKAR-993x1024.png" alt="SMART DAMKAR Kabupaten Temanggung">
+    <img src="https://vincifire.com/wp-content/uploads/2022/01/LOGO-DAMKAR-993x1024.png" alt="SMART DAMKAR Kabupaten Temanggung" class="logo-damkar">
     <h2>Login Admin</h2>
 
     <!-- Pesan error jika login gagal -->

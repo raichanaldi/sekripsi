@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #e63946, #1d3557); /* Gradien merah dan biru gelap untuk tema Damkar */
             margin: 0;
             padding: 0;
         }
@@ -21,12 +21,14 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-top: 30px;
+            border: 2px solid #e63946; /* Red Border to emphasize Fire theme */
         }
 
         h2 {
             text-align: center;
-            color: #333;
+            color: #e63946; /* Fire Red color */
             margin-bottom: 20px;
+            font-size: 24px;
         }
 
         .form-group {
@@ -49,16 +51,17 @@
         button {
             width: 100%;
             padding: 12px;
-            background-color: #4CAF50;
+            background-color: #e63946; /* Fire Red color */
             color: white;
             border: none;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
+            transition: 0.3s;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #d62839; /* Darker red on hover */
         }
 
         .location-inputs {
@@ -81,11 +84,34 @@
             font-size: 16px;
             margin-bottom: 15px;
         }
+
+        /* Adding a firetruck icon at the top for better branding */
+        .firetruck-icon {
+            display: block;
+            margin: 0 auto 20px;
+            width: 100px;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #e63946;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Firetruck icon to represent Damkar theme -->
+    <img src="https://www.example.com/firetruck-icon.png" alt="Firetruck" class="firetruck-icon">
+
     <h2>Laporan Kebakaran - Smart Damkar</h2>
 
     @if(session('success'))
@@ -127,6 +153,8 @@
 
         <button type="submit">Kirim Laporan</button>
     </form>
+
+    <a href="/" class="back-link">&#8592; Kembali ke Halaman Utama</a>
 </div>
 
 <script>

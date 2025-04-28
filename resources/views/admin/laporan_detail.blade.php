@@ -86,13 +86,13 @@
 
     <div class="form-group">
         <p><strong>Foto Kejadian:</strong></p>
-        <img src="{{ asset('storage/' . $laporan->foto) }}" alt="Foto Kejadian" style="max-width:100%; border-radius:8px;">
+        <img src="{{ asset('storage/foto_bukti/' . basename($laporan->foto)) }}" alt="Foto Kejadian" style="max-width:100%; border-radius:8px;">
 
     </div>
 
     <div class="form-group">
-        <p><strong>Pos Damkar yang Bertugas:</strong> {{ $laporan->posDamkar->nama }}</p>
-    </div>
+    <p><strong>Pos Damkar yang Bertugas:</strong> {{ $laporan->posDamkar->nama_pos ?? '-' }}</p>
+</div>
 
     <div class="form-group">
         <p><strong>Akses Lokasi Kejadian:</strong></p>

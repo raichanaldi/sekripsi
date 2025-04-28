@@ -36,10 +36,11 @@ class LaporanController extends Controller
             'longitude' => $request->longitude,
             'pos_damkar_id' => $closestPos->id,
             'status' => 'masuk',
-            'foto' => $request->file('foto') ? $request->file('foto')->store('public/foto_bukti') : null,
+            'foto' => $request->hasFile('foto') ? $request->file('foto')->store('foto_bukti', 'public') : null,
         ]);
-
+        
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dibuat! Laporan Anda akan segera diproses.');
+        
     }
 
     private function getClosestPosDamkar($latitude, $longitude, $posDamkars)
@@ -153,30 +154,47 @@ private function buildGraph($posDamkars)
 
     public function masuk()
     {
-        $laporanMasuk = Laporan::where('status', 'masuk')->get();
+        // Mengambil laporan dengan status 'masuk', diurutkan berdasarkan 'created_at' terbaru, dan menampilkan 10 laporan per halaman
+        $laporanMasuk = Laporan::where('status', 'masuk')
+                              ->orderBy('created_at', 'desc') // Urutkan berdasarkan waktu terbaru
+                              ->paginate(10); // Pagination 10 laporan per halaman
+    
         return view('admin.laporan_masuk', compact('laporanMasuk'));
     }
+    
 
     public function diterima()
-    {
-        $laporanDiterima = Laporan::where('status', 'diterima')->get();
-        return view('admin.laporan_diterima', compact('laporanDiterima'));
-    }
+{
+    $laporanDiterima = Laporan::where('status', 'diterima')->get();
+    return view('laporan.laporan_diterima', compact('laporanDiterima'));
+}
+
+    
+
+
 
     public function terima($laporanId)
-    {
-        $laporan = Laporan::findOrFail($laporanId);
-        $laporan->status = 'diterima';
-        $laporan->save();
+{
+    // Cari laporan berdasarkan ID
+    $laporan = Laporan::findOrFail($laporanId);
 
-        return redirect()->route('laporan.diterima')->with('success', 'Laporan berhasil diterima.');
-    }
+    // Update status laporan menjadi 'diterima'
+    $laporan->status = 'diterima';
+    
+    // Simpan perubahan ke database
+    $laporan->save();
+
+    // Arahkan ke halaman laporan diterima dengan pesan sukses
+    return redirect()->route('admin.laporan.diterima')->with('success', 'Laporan berhasil diterima.');
+}
+
 
     public function show($laporanId)
-    {
-        $laporan = Laporan::findOrFail($laporanId);
-        return view('admin.laporan_detail', compact('laporan'));
-    }
+{
+    $laporan = Laporan::with('posDamkar')->findOrFail($laporanId);
+    return view('admin.laporan_detail', compact('laporan'));
+}
+
 
     public function index()
     {

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -19,42 +21,61 @@ class AdminController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            // Regenerasi session untuk keamanan
             $request->session()->regenerate();
-
-            // Redirect ke dashboard admin setelah login berhasil
             return redirect()->route('admin.dashboard');
         }
 
-        // Jika login gagal, kembali ke halaman login dengan pesan error
         return redirect()->route('admin.login')->with('error', 'Email atau Password salah!');
     }
 
-    // Method untuk menampilkan halaman dashboard admin
+    // Method untuk menampilkan halaman dashboard admin + data grafik laporan per bulan
     public function dashboard()
     {
-        return view('admin.dashboard'); // Ganti dengan nama view yang sesuai
+        $laporanPerBulan = Laporan::selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->pluck('total', 'bulan');
+
+        $dataBulan = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $dataBulan[] = $laporanPerBulan[$i] ?? 0;
+        }
+
+        return view('admin.dashboard', [
+            'dataBulan' => $dataBulan
+        ]);
     }
 
     // Method untuk logout admin
     public function logout(Request $request)
     {
-        // Logout admin dan invalidate session
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        // Redirect ke halaman login setelah logout
         return redirect()->route('admin.login');
     }
-    // Di dalam AdminController.php
 
-public function laporanDiterima()
+    // Menampilkan laporan yang diterima
+    public function laporanDiterima()
+    {
+        $laporanDiterima = Laporan::where('status', 'diterima')->orderBy('created_at', 'desc')->get();
+        return view('admin.laporan_diterima', compact('laporanDiterima'));
+    }
+
+    // Method untuk menerima laporan dan mengubah status menjadi 'diterima'
+    public function terima($laporanId)
 {
-    // Logika untuk menampilkan laporan yang diterima
-    // Misalnya, kamu bisa memanggil data laporan diterima dari database
-    return view('admin.laporan_diterima'); // Ganti dengan view yang sesuai
+    $laporan = Laporan::find($laporanId);
+    
+    if (!$laporan) {
+        return redirect()->route('laporan.masuk')->with('error', 'Laporan tidak ditemukan.');
+    }
+
+    // Ubah status menjadi diterima
+    $laporan->status = 'diterima';
+    $laporan->save();
+
+    // Redirect ke halaman laporan diterima
+    return redirect()->route('laporan.diterima')->with('success', 'Laporan berhasil diterima.');
 }
 
 }

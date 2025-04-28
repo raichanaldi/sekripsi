@@ -9,98 +9,147 @@
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 0;
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 250px;
-            background-color: #2C3E50;
+            background-color: #B22222; /* merah damkar */
             padding-top: 20px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
+
         .sidebar h2 {
             color: white;
             text-align: center;
             margin-bottom: 20px;
         }
+
         .sidebar ul {
             list-style: none;
             padding: 0;
-            margin: 0;
         }
+
         .sidebar ul li {
             padding: 15px;
             text-align: center;
         }
-        .sidebar ul li a {
+
+        .sidebar ul li a,
+        .sidebar ul li form button {
             color: white;
             text-decoration: none;
+            font-size: 16px;
+            background: none;
+            border: none;
+            width: 100%;
             display: block;
+            cursor: pointer;
         }
+
         .sidebar ul li:hover {
-            background-color: #34495E;
+            background-color: #8B0000;
         }
+
         .content {
             flex-grow: 1;
-            padding: 20px;
+            padding: 30px;
+            background-color: #fdf3f3;
         }
+
         .content h2 {
-            color: #2C3E50;
+            color: #8B0000;
         }
-        .content table {
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             margin-top: 20px;
         }
-        .content table, th, td {
-            border: 1px solid #ddd;
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
         }
-        .content th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        .content th {
-            background-color: #f2f2f2;
-        }
-        .action-button {
-            padding: 5px 10px;
+
+        th {
+            background-color: #FF6347; /* oranye damkar */
             color: white;
+        }
+
+        tr:hover {
+            background-color: #ffe5e5;
+        }
+
+        .action-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
             text-decoration: none;
-            border-radius: 5px;
-            display: inline-block;
             margin-right: 5px;
         }
-        .btn-detail { background-color: #3498DB; }
-        .btn-hapus { background-color: #E74C3C; }
-        .btn-detail:hover, .btn-hapus:hover {
-            opacity: 0.8;
+
+        .btn-detail {
+            background-color: #3498DB;
         }
+
+        .btn-hapus {
+            background-color: #E74C3C;
+        }
+
+        .btn-detail:hover, .btn-hapus:hover {
+            opacity: 0.85;
+        }
+
         .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #2C3E50;
+            background-color: #B22222;
             color: white;
             text-align: center;
             padding: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 250px;
+            width: calc(100% - 250px);
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
+<div class="sidebar">
         <div>
             <h2>SMART Damkar</h2>
             <ul>
                 <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                 <li><a href="{{ route('laporan.masuk') }}">Laporan Masuk</a></li>
-                <li><a href="{{ route('laporan.diterima') }}">Laporan Diterima</a></li>
+                <li><a href="{{ route('admin.laporan.diterima') }}">Laporan Diterima</a></li>
                 <li>
-                    <form action="{{ route('admin.logout') }}" method="POST" style="display:inline;">
+                    <form action="{{ route('admin.logout') }}" method="POST">
                         @csrf
                         <button type="submit">Logout</button>
                     </form>
@@ -111,16 +160,15 @@
 
     <div class="content">
         <h2>Laporan Diterima</h2>
+
         @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
+            <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+
         @if(session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
+            <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
+
         <table>
             <thead>
                 <tr>
@@ -150,10 +198,15 @@
                 @endforeach
             </tbody>
         </table>
+
+        <!-- Pagination links -->
+        <div class="pagination">
+            {{ $laporanDiterima->links() }}
+        </div>
     </div>
 
     <div class="footer">
-        &copy; 2025 SMART Damkar Temanggung
+        &copy; 2025 SMART Damkar Kabupaten Temanggung
     </div>
 
 </body>

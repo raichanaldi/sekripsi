@@ -36,14 +36,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/laporan/{laporan}/proses', [LaporanController::class, 'prosesLaporan'])->name('laporan.proses');
 
     // Laporan Diterima (admin)
-    Route::get('/laporan/diterima', [LaporanController::class, 'diterima'])->name('laporan.diterima');
+    Route::get('/admin/laporan/diterima', [AdminController::class, 'laporanDiterima'])->name('admin.laporan.diterima');
 
     // Proses untuk menerima laporan dan mengubah status menjadi 'diterima'
-    Route::patch('/laporan/{laporan}/terima', [LaporanController::class, 'terima'])->name('laporan.terima');
-
+    Route::patch('/laporan/{laporan}/terima', [AdminController::class, 'terima'])->name('laporan.terima');
+    
     // Menghapus laporan (admin) - Pastikan fungsi hapus ada di controller
     Route::delete('/laporan/{laporan}/hapus', [LaporanController::class, 'hapus'])->name('laporan.hapus');
-
-    // Admin lihat laporan diterima
-    Route::get('/admin/laporan/diterima', [AdminController::class, 'laporanDiterima'])->name('admin.laporan.diterima');
 });
