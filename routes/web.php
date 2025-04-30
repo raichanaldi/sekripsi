@@ -5,8 +5,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LaporanController;
 
 // Halaman utama (beranda)
-Route::get('/', function() { 
-    return view('welcome'); 
+Route::get('/', function () {
+    return view('welcome');
 });
 
 // Halaman laporan untuk masyarakat
@@ -40,7 +40,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Proses untuk menerima laporan dan mengubah status menjadi 'diterima'
     Route::patch('/laporan/{laporan}/terima', [AdminController::class, 'terima'])->name('laporan.terima');
-    
+
     // Menghapus laporan (admin) - Pastikan fungsi hapus ada di controller
-    Route::delete('/laporan/{laporan}/hapus', [LaporanController::class, 'hapus'])->name('laporan.hapus');
+    Route::delete('/laporan/{laporan}/hapus', [LaporanController::class, 'hapusLaporan'])->name('laporan.hapus');
 });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daftar Laporan Masuk - SMART Damkar</title>
+  <title>Daftar Laporan Diterima - SMART Damkar</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -122,16 +122,11 @@
       background-color: #3498DB;
     }
 
-    .btn-terima {
-      background-color: #27AE60;
-    }
-
     .btn-hapus {
       background-color: #E74C3C;
     }
 
     .btn-detail:hover,
-    .btn-terima:hover,
     .btn-hapus:hover {
       opacity: 0.85;
     }
@@ -169,7 +164,7 @@
   </div>
 
   <div class="content">
-    <h2>Laporan Masuk</h2>
+    <h2>Laporan Diterima</h2>
 
     @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -190,7 +185,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach($laporanMasuk as $laporan)
+        @foreach($laporanDiterima as $laporan)
         <tr>
           <td>{{ $loop->iteration }}</td>
           <td>{{ $laporan->nama_pelapor }}</td>
@@ -198,11 +193,6 @@
           <td>{{ $laporan->created_at->format('d-m-Y H:i') }}</td>
           <td>
             <a href="{{ route('laporan.show', $laporan->id) }}" class="action-button btn-detail">Lihat Detail</a>
-            <form action="{{ route('laporan.terima', $laporan->id) }}" method="POST" style="display:inline;">
-              @csrf
-              @method('PATCH')
-              <button type="submit" class="action-button btn-terima">Terima</button>
-            </form>
             <form action="{{ route('laporan.hapus', $laporan->id) }}" method="POST" style="display:inline;">
               @csrf
               @method('DELETE')
@@ -216,7 +206,7 @@
 
     <!-- Pagination links -->
     <div class="pagination">
-      {{ $laporanMasuk->links() }}
+      {{ $laporanDiterima->links() }}
     </div>
   </div>
 

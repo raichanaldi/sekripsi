@@ -57,25 +57,24 @@ class AdminController extends Controller
     // Menampilkan laporan yang diterima
     public function laporanDiterima()
     {
-        $laporanDiterima = Laporan::where('status', 'diterima')->orderBy('created_at', 'desc')->get();
+        $laporanDiterima = Laporan::where('status', 'diterima')->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.laporan_diterima', compact('laporanDiterima'));
     }
 
     // Method untuk menerima laporan dan mengubah status menjadi 'diterima'
     public function terima($laporanId)
-{
-    $laporan = Laporan::find($laporanId);
-    
-    if (!$laporan) {
-        return redirect()->route('laporan.masuk')->with('error', 'Laporan tidak ditemukan.');
+    {
+        $laporan = Laporan::find($laporanId);
+
+        if (!$laporan) {
+            return redirect()->route('laporan.masuk')->with('error', 'Laporan tidak ditemukan.');
+        }
+
+        // Ubah status menjadi diterima
+        $laporan->status = 'diterima';
+        $laporan->save();
+
+        // Redirect ke halaman laporan diterima
+        return redirect()->route('laporan.masuk')->with('success', 'Laporan berhasil diterima.');
     }
-
-    // Ubah status menjadi diterima
-    $laporan->status = 'diterima';
-    $laporan->save();
-
-    // Redirect ke halaman laporan diterima
-    return redirect()->route('laporan.diterima')->with('success', 'Laporan berhasil diterima.');
-}
-
 }

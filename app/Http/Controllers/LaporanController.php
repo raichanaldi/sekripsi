@@ -38,46 +38,45 @@ class LaporanController extends Controller
             'status' => 'masuk',
             'foto' => $request->hasFile('foto') ? $request->file('foto')->store('foto_bukti', 'public') : null,
         ]);
-        
+
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dibuat! Laporan Anda akan segera diproses.');
-        
     }
 
     private function getClosestPosDamkar($latitude, $longitude, $posDamkars)
-{
-    // Mengambil ID pos damkar yang terdekat
-    $startPos = $this->getClosestPosStart($latitude, $longitude, $posDamkars);
-    if (!$startPos) return null;
+    {
+        // Mengambil ID pos damkar yang terdekat
+        $startPos = $this->getClosestPosStart($latitude, $longitude, $posDamkars);
+        if (!$startPos) return null;
 
-    // Caching untuk graph dan hasil Dijkstra
-    $cacheKey = "graph_cache_" . implode('_', array_map(fn($pos) => $pos->id, $posDamkars->all()));
+        // Caching untuk graph dan hasil Dijkstra
+        $cacheKey = "graph_cache_" . implode('_', array_map(fn($pos) => $pos->id, $posDamkars->all()));
 
-    $distances = Cache::remember($cacheKey, 60, function () use ($posDamkars, $startPos) {
-        $graph = $this->buildGraph($posDamkars);
-        return $this->dijkstra($graph, $startPos); // Mengirim ID pos damkar ke dijkstra
-    });
+        $distances = Cache::remember($cacheKey, 60, function () use ($posDamkars, $startPos) {
+            $graph = $this->buildGraph($posDamkars);
+            return $this->dijkstra($graph, $startPos); // Mengirim ID pos damkar ke dijkstra
+        });
 
-    // Menentukan pos damkar terdekat
-    $closestPosId = $this->findClosestPosId($distances);
+        // Menentukan pos damkar terdekat
+        $closestPosId = $this->findClosestPosId($distances);
 
-    return PosDamkar::find($closestPosId); // Mengembalikan objek PosDamkar berdasarkan ID terdekat
-}
-
-
-private function buildGraph($posDamkars)
-{
-    $graph = [];
-
-    // Menggunakan query yang lebih efisien daripada TepiJalan::all()
-    $edges = TepiJalan::select('node_awal', 'node_tujuan', 'jarak')->get();
-
-    foreach ($edges as $edge) {
-        $graph[$edge->node_awal][$edge->node_tujuan] = $edge->jarak;
-        $graph[$edge->node_tujuan][$edge->node_awal] = $edge->jarak;
+        return PosDamkar::find($closestPosId); // Mengembalikan objek PosDamkar berdasarkan ID terdekat
     }
 
-    return $graph;
-}
+
+    private function buildGraph($posDamkars)
+    {
+        $graph = [];
+
+        // Menggunakan query yang lebih efisien daripada TepiJalan::all()
+        $edges = TepiJalan::select('node_awal', 'node_tujuan', 'jarak')->get();
+
+        foreach ($edges as $edge) {
+            $graph[$edge->node_awal][$edge->node_tujuan] = $edge->jarak;
+            $graph[$edge->node_tujuan][$edge->node_awal] = $edge->jarak;
+        }
+
+        return $graph;
+    }
 
 
     private function dijkstra($graph, $startPos)
@@ -85,26 +84,46 @@ private function buildGraph($posDamkars)
         $distances = [];
         $previous = [];
         $queue = new \SplPriorityQueue();
+        $visited = []; // Tambah array untuk tracking vertex yang sudah dikunjungi
 
+        // Inisialisasi distances
         foreach ($graph as $vertex => $edges) {
             $distances[$vertex] = INF;
             $previous[$vertex] = null;
-            $queue->insert($vertex, INF);
         }
 
+        // Set distance awal
         $distances[$startPos] = 0;
-        $queue->insert($startPos, 0);
+        $queue->setExtractFlags(\SplPriorityQueue::EXTR_DATA);
+        $queue->insert($startPos, -0); // Gunakan nilai negatif untuk prioritas
 
         while (!$queue->isEmpty()) {
             $minVertex = $queue->extract();
 
+            // Skip jika vertex sudah dikunjungi
+            if (isset($visited[$minVertex])) {
+                continue;
+            }
+
+            $visited[$minVertex] = true;
+
+            // Pastikan vertex ada dalam graph
+            if (!isset($graph[$minVertex])) {
+                continue;
+            }
+
             foreach ($graph[$minVertex] as $neighbor => $weight) {
+                // Skip jika neighbor tidak ada dalam graph
+                if (!isset($graph[$neighbor])) {
+                    continue;
+                }
+
                 $alt = $distances[$minVertex] + $weight;
 
                 if ($alt < $distances[$neighbor]) {
                     $distances[$neighbor] = $alt;
                     $previous[$neighbor] = $minVertex;
-                    $queue->insert($neighbor, $alt);
+                    $queue->insert($neighbor, -$alt); // Gunakan nilai negatif untuk prioritas
                 }
             }
         }
@@ -156,48 +175,65 @@ private function buildGraph($posDamkars)
     {
         // Mengambil laporan dengan status 'masuk', diurutkan berdasarkan 'created_at' terbaru, dan menampilkan 10 laporan per halaman
         $laporanMasuk = Laporan::where('status', 'masuk')
-                              ->orderBy('created_at', 'desc') // Urutkan berdasarkan waktu terbaru
-                              ->paginate(10); // Pagination 10 laporan per halaman
-    
+            ->orderBy('created_at', 'desc') // Urutkan berdasarkan waktu terbaru
+            ->paginate(10); // Pagination 10 laporan per halaman
+
         return view('admin.laporan_masuk', compact('laporanMasuk'));
     }
-    
+
 
     public function diterima()
-{
-    $laporanDiterima = Laporan::where('status', 'diterima')->get();
-    return view('laporan.laporan_diterima', compact('laporanDiterima'));
-}
+    {
+        $laporanDiterima = Laporan::where('status', 'diterima')->get();
+        return view('laporan.laporan_diterima', compact('laporanDiterima'));
+    }
 
-    
+
 
 
 
     public function terima($laporanId)
-{
-    // Cari laporan berdasarkan ID
-    $laporan = Laporan::findOrFail($laporanId);
+    {
+        // Cari laporan berdasarkan ID
+        $laporan = Laporan::findOrFail($laporanId);
 
-    // Update status laporan menjadi 'diterima'
-    $laporan->status = 'diterima';
-    
-    // Simpan perubahan ke database
-    $laporan->save();
+        // Update status laporan menjadi 'diterima'
+        $laporan->status = 'diterima';
 
-    // Arahkan ke halaman laporan diterima dengan pesan sukses
-    return redirect()->route('admin.laporan.diterima')->with('success', 'Laporan berhasil diterima.');
-}
+        // Simpan perubahan ke database
+        $laporan->save();
+
+        // Arahkan ke halaman laporan diterima dengan pesan sukses
+        return redirect()->route('admin.laporan.diterima')->with('success', 'Laporan berhasil diterima.');
+    }
 
 
     public function show($laporanId)
-{
-    $laporan = Laporan::with('posDamkar')->findOrFail($laporanId);
-    return view('admin.laporan_detail', compact('laporan'));
-}
+    {
+        $laporan = Laporan::with('posDamkar')->findOrFail($laporanId);
+        return view('admin.laporan_detail', compact('laporan'));
+    }
 
 
     public function index()
     {
         return view('laporan.index');
+    }
+
+    public function hapusLaporan($laporanId)
+    {
+        try {
+            // Cari laporan berdasarkan ID
+            $laporan = Laporan::findOrFail($laporanId);
+
+            // Hapus laporan
+            $laporan->delete();
+
+            // Redirect dengan pesan sukses
+            return redirect()->back()->with('success', 'Laporan berhasil dihapus');
+        } catch (\Exception $e) {
+            // Redirect dengan pesan error jika terjadi kesalahan
+            return redirect()->back()->with('error', 'Gagal menghapus laporan: ' . $e->getMessage());
+        }
     }
 }
